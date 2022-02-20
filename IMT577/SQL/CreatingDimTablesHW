@@ -1,0 +1,471 @@
+--===================================================
+-------------DIM_Location
+--===================================================
+Create or Replace table DIM_Location (
+	DimLocationID INT IDENTITY(1,1) CONSTRAINT PK_DimLocationID PRIMARY KEY NOT NULL,
+	ADDRESS	VARCHAR(255) NOT NULL,
+	CITY VARCHAR(255) NOT NULL,
+	PostalCode VARCHAR(255) NOT NULL,
+	State_Province VARCHAR(255) NOT NULL,
+	Country VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Location
+(
+     DimLocationID
+	, ADDRESS
+    , CITY
+    , PostalCode
+    , State_Province
+    , Country
+)
+VALUES
+( 
+     -1
+    ,'Unknown'
+    ,'Unknown'
+    ,'Unknown'
+    ,'Unknown'
+    ,'Unknown'
+);
+
+-- insert data
+INSERT INTO DIM_Location
+(
+      DimLocationID
+	, ADDRESS
+    , CITY
+    , PostalCode
+    , State_Province
+    , Country
+)
+-- insert data
+INSERT INTO DIM_Location
+(
+    ADDRESS
+    , CITY
+    , PostalCode
+    , State_Province
+    , Country
+)
+    SELECT 
+        ADDRESS
+        , CITY
+        , PostalCode
+        , StateProvince as State_Province
+        , Country
+
+    FROM STAGE_Store
+
+
+INSERT INTO DIM_Location
+(
+    ADDRESS
+    , CITY
+    , PostalCode
+    , State_Province
+    , Country
+)
+  SELECT 
+      ADDRESS
+      , CITY
+      , PostalCode
+      , StateProvince as State_Province
+      , Country
+
+  FROM STAGE_RESELLER
+
+INSERT INTO DIM_Location
+(
+    ADDRESS
+    , CITY
+    , PostalCode
+    , State_Province
+    , Country
+)
+  SELECT 
+      ADDRESS
+      , CITY
+      , PostalCode
+      , StateProvince as State_Province
+      , Country
+
+  FROM STAGE_CUSTOMER
+  
+  select * from DIM_Location;
+
+
+--===================================================
+-------------DIM_Store
+--===================================================
+
+/*
+Dim_Store Table
+DimStoreID (created in dim table)
+DimLocationID (pulled from location table)
+SourceStoreID (stage store)
+StoreName (??)
+StoreNumber (stage store)
+StoreManager (stage store)
+*/
+
+Create or Replace table DIM_Store(
+	DimStoreID INT IDENTITY(1,1) CONSTRAINT PK_DimStoreID PRIMARY KEY NOT NULL,
+    DimLocationID	INTEGER NOT NULL,
+	SourceStoreID   INTEGER NOT NULL,
+	StoreName       VARCHAR(255) NOT NULL,
+	StoreNumber     INTEGER NOT NULL,
+	StoreManager    VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Store
+(
+    DimStoreID,
+    DimLocationID,
+	SourceStoreID,
+	StoreName,
+	StoreNumber,
+	StoreManager 
+)
+
+VALUES
+( 
+     -1
+    , -1
+    , -1
+    ,'Unknown'
+    ,-1
+    ,'Unknown'
+);
+
+-- Insert Data 
+INSERT INTO DIM_Store
+(
+    DimStoreID,
+    DimLocationID,
+	SourceStoreID,
+	StoreName,
+	StoreNumber,
+	StoreManager 
+)
+    SELECT 
+        DimStoreID,
+        L.DimLocationID,
+        S.StoreID as SourceStoreID, -- ??
+        StoreName, -- ??
+        S.StoreNumber,
+        S.StoreManager
+
+    FROM STAGE_STORE S 
+    JOIN DIM_Location as L on L.ADDRESS = S.ADDRESS -- is this connection right? 
+
+
+
+
+--===================================================
+-------------DIM_Reseller
+--===================================================
+/*
+Dim_Reseller Table
+
+DimResellerID (created in table)
+DimLocationID (from location)
+ResellerID (stage reseller)
+ResellerName (stage reseller)
+ContactName (stage reseller)
+PhoneNumber (stage reseller)
+Email (stage reseller)
+*/
+
+
+Create or Replace table DIM_Reseller(
+	DimResellerID INT IDENTITY(1,1) CONSTRAINT PK_DimResellerID PRIMARY KEY NOT NULL,
+    DimLocationID   INTEGER NOT NULL,
+	ResellerID      INTEGER NOT NULL,
+	ResellerName    VARCHAR(255) NOT NULL,
+	ContactName     INTEGER NOT NULL,
+	PhoneNumber     VARCHAR(255) NOT NULL,
+    Email           VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Reseller
+(
+    DimResellerID,
+    DimLocationID,
+	ResellerID,
+	ResellerName,
+	ContactName,
+	PhoneNumber,
+    Email
+)
+VALUES
+( 
+     -1
+    , -1
+    , -1
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+);
+
+-- insert data
+INSERT INTO DIM_Reseller
+(
+    DimResellerID,
+    DimLocationID,
+	ResellerID,
+	ResellerName,
+	ContactName,
+	PhoneNumber,
+    Email
+)
+    SELECT 
+        DimResellerID,
+        L.DimLocationID,
+        R.ResellerID,
+        R.ResellerName,
+        R.ContactName,
+        R.PhoneNumber,
+        R.Email
+
+    FROM STAGE_RESELLER R
+    JOIN DIM_Location as L on L.ADDRESS = R.ADDRESS -- is this connection right? 
+
+
+
+
+--===================================================
+-------------DIM_Customer
+--===================================================
+
+/*
+DimCustomer Table
+
+DimCustomerID
+DimLocationID
+CustomerID
+CustomerFullName
+CustomerFirstName
+CustomerLastName
+CustomerGender
+*/
+
+
+Create or Replace table DIM_Customer(
+	DimCustomerID INT IDENTITY(1,1) CONSTRAINT PK_DimCustomerID PRIMARY KEY NOT NULL,
+    DimLocationID   INTEGER NOT NULL,
+	CustomerID      INTEGER NOT NULL,
+	CustomerFullName    VARCHAR(255) NOT NULL,
+	CustomerFirstName   VARCHAR(255) NOT NULL,
+	CustomerLastName    VARCHAR(255) NOT NULL,
+    CustomerGender      VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Customer
+(
+    DimCustomerID,
+    DimLocationID,
+	CustomerID,
+	CustomerFullName,
+	CustomerFirstName,
+	CustomerLastName,
+    CustomerGender
+)
+VALUES
+( 
+     -1
+    , -1
+    , -1
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+);
+
+-- insert data
+INSERT INTO DIM_Customer
+(
+    DimCustomerID,
+    DimLocationID,
+	CustomerID,
+	CustomerFullName,
+	CustomerFirstName,
+	CustomerLastName,
+    CustomerGender
+)
+    SELECT 
+        DimCustomerID,
+        L.DimLocationID,
+        C.CustomerID,
+        (C.FirstName + ' ' + C.LastName) as CustomerFullName, -- can i connect them this way?
+        C.FirstName as CustomerFirstName,
+        C.LastName as CustomerLastName,
+        C.Gender as CustomerGender
+
+    FROM STAGE_CUSTOMER C
+    JOIN DIM_Location as L on L.ADDRESS = R.ADDRESS -- is this connection right? 
+
+
+--===================================================
+-------------DIM_Channel
+--===================================================
+
+/*
+DimChannel Table
+
+DimChannelID
+ChannelCategoryID
+ChannelName
+ChannelCategory
+*/
+
+Create or Replace table DIM_Channel(
+	DimChannelID INT IDENTITY(1,1) CONSTRAINT PK_DimChannelID PRIMARY KEY NOT NULL,
+    ChannelCategoryID  INTEGER NOT NULL,
+	ChannelName      INTEGER NOT NULL,
+	ChannelCategory    VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Channel
+(
+    DimChannelID,
+    ChannelCategoryID,
+	ChannelName,
+	ChannelCategory
+)
+VALUES
+( 
+     -1
+    , -1
+    , 'Unknown'
+    , 'Unknown'
+);
+
+Insert Into DIM_Channel
+(
+    DimChannelID,
+    ChannelCategoryID,
+	ChannelName,
+	ChannelCategory  
+)
+  SELECT 
+      C.ChannelCategoryID as DimChannelID, -- is this right?
+      C.ChannelCategoryID as ChannelCategoryID,
+      C.Channel as ChannelName,
+      CC.ChannelCategory
+
+  FROM STAGE_CHANNEL as C
+  JOIN STAGE_CHANNELCATEGORY as CC on CC.ChannelCategoryID = C.ChannelCategoryID
+
+select * from DIM_Channel;
+
+
+--===================================================
+-------------DIM_Product
+--===================================================
+
+/*
+DimProduct Table
+
+DimProductID
+ProductID
+ProductCategoryID
+ProductName
+ProductType
+ProductCategory
+ProductRetailPrice
+ProductWholesalePrice
+ProductCost
+ProdcutRetailProfit
+ProductWholesaleUnitProfit
+ProdcutProfitMarginUnitPercent
+*/
+
+Create or Replace table DIM_Product(
+	DimProductID INT IDENTITY(1,1) CONSTRAINT PK_DimProductID PRIMARY KEY NOT NULL,
+    ProductID           INTEGER NOT NULL,
+	ProductCategoryID   INTEGER NOT NULL,
+	ProductName    VARCHAR(255) NOT NULL,
+    ProductType    VARCHAR(255) NOT NULL, 
+    ProductCategory    VARCHAR(255) NOT NULL,
+    ProductRetailPrice      INTEGER NOT NULL,
+    ProductWholesalePrice       INTEGER NOT NULL,
+    ProductCost      INTEGER NOT NULL,
+    ProductRetailProfit      INTEGER NOT NULL,
+    ProductWholesaleUnitProfit      INTEGER NOT NULL,
+    ProdcutProfitMarginUnitPercent      INTEGER NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Product
+(
+    DimProductID
+    , ProductID
+    , ProductCategoryID
+    , ProductName
+    , ProductType
+    , ProductCategory
+    , ProductRetailPrice
+    , ProductWholesalePrice
+    , ProductCost
+    , ProductRetailProfit
+    , ProductWholesaleUnitProfit
+    , ProdcutProfitMarginUnitPercent
+)
+VALUES
+( 
+    -1
+    , -1
+    , -1
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+    , -1
+    , -1
+    , -1
+    , -1
+    , -1
+    , -1
+);
+
+
+SELECT 
+    DimProductID
+    , P.ProductID
+    , PC.ProductCategoryID
+    , P.Product as ProductName -- product in stage product?
+    , PT.ProductType
+    , PC.ProductCategory
+    , P.Price as ProductRetailPrice -- product price in stage product?
+    , P.WholesalePrice as ProductWholesalePrice -- pt? 
+    , P.Cost as ProductCost
+    , (P.UNITOFMEASURE * P.Price) - (P.UNITOFMEASURE * P.Cost) as ProductRetailProfit --calculated
+    , (P.UNITOFMEASURE * P.Price) - (P.UNITOFMEASURE * P.WholesalePrice) as ProductWholesaleUnitProfit --calculated
+    , (P.Price - P.Cost) / (P.Price) as ProductProfitMarginUnitPercent --calculated
+FROM STAGE_PRODUCT as P
+JOIN STAGE_PRODUCTTYPE as PT on PT.PRODUCTTYPEID = P.PRODUCTTYPEID 
+--issue here with producttypeID not in stage Product / how to join?
+JOIN STAGE_PRODUCTCATEGORY as PC on PT.ProductCategoryID = PC.ProductCategoryID
+-- join on product type ID and ProductCategoryID
+
+/*
+sales amount = quantity * price
+sales profit = (quantity * price) - (quantity * cost)
+profit margin % of individual products (price - cost) / (price)
+*/
+
+
+--===================================================
+-------------DIM_Date
+--===================================================
+
+/*
+DimDate Table
+Code provided for this Dim Date Table
+*/
