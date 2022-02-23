@@ -1,0 +1,386 @@
+--===================================================
+-------------DIM_Product
+--===================================================
+
+Create or Replace table DIM_Product(
+	DimProductID INT IDENTITY(1,1) CONSTRAINT PK_DimProductID PRIMARY KEY NOT NULL,
+    ProductID           INTEGER NOT NULL,
+	ProductCategoryID   INTEGER NOT NULL,
+	ProductName    VARCHAR(255) NOT NULL,
+    ProductType    VARCHAR(255) NOT NULL, 
+    ProductCategory    VARCHAR(255) NOT NULL,
+    ProductRetailPrice      INTEGER NOT NULL,
+    ProductWholesalePrice       INTEGER NOT NULL,
+    ProductCost      INTEGER NOT NULL,
+    ProductRetailProfit      INTEGER NOT NULL,
+    ProductWholesaleUnitProfit      INTEGER NOT NULL,
+    ProdcutProfitMarginUnitPercent      INTEGER NOT NULL
+);
+
+INSERT INTO DIM_Product
+(
+    DimProductID
+    , ProductID
+    , ProductCategoryID
+    , ProductName
+    , ProductType
+    , ProductCategory
+    , ProductRetailPrice
+    , ProductWholesalePrice
+    , ProductCost
+    , ProductRetailProfit
+    , ProductWholesaleUnitProfit
+    , ProdcutProfitMarginUnitPercent
+)
+VALUES
+( 
+    -1
+    , -1
+    , -1
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+    , -1
+    , -1
+    , -1
+    , -1
+    , -1
+    , -1
+);
+
+SELECT
+        P.ProductID
+        , PT.ProductTypeID
+        , PC.ProductCategoryID
+        , P.Product
+        , PT.ProductType
+        , PC.ProductCategory
+        , P.Price
+        , P.WholesalePrice
+        , P.Cost
+        , P.Price-P.Cost
+        , P.WholesalePrice-P.Cost
+        , (P.Price-P.Cost)/P.Price
+    FROM STAGE_PRODUCT AS P
+    INNER JOIN STAGE_PRODUCTTYPE AS PT ON P.ProductTypeID = PT.ProductTypeID
+    INNER JOIN STAGE_PRODUCTCATEGORY AS PC ON PT.ProductCategoryID = PC.ProductCategoryID
+
+
+/*
+
+SELECT 
+     P.ProductID
+    , PC.ProductCategoryID
+    , P.Product as ProductName -- product in stage product?
+    , PT.ProductType
+    , PC.ProductCategory
+    , P.Price as ProductRetailPrice -- product price in stage product?
+    , P.WholesalePrice as ProductWholesalePrice -- pt? 
+    , P.Cost as ProductCost
+    , (P.Price) - (P.Cost) as ProductRetailProfit --calculated
+    , (P.Price) - (P.WholesalePrice) as ProductWholesaleUnitProfit --calculated
+    , (P.Price - P.Cost) / (P.Price) as ProductProfitMarginUnitPercent --calculated
+
+
+FROM STAGE_PRODUCT AS P
+    INNER JOIN STAGE_PRODUCTTYPE AS PT ON P.ProductTypeID = PT.ProductTypeID
+    INNER JOIN STAGE_PRODUCTCATEGORY AS PC ON PT.ProductCategoryID = PC.ProductCategoryID
+;
+
+*/
+--===================================================
+-------------DIM_Channel
+--===================================================
+
+Create or Replace table DIM_Channel(
+	DimChannelID INT IDENTITY(1,1) CONSTRAINT PK_DimChannelID PRIMARY KEY NOT NULL,
+    ChannelCategoryID  INTEGER NOT NULL,
+	ChannelName      VARCHAR(255) NOT NULL,
+	ChannelCategory    VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Channel
+(
+    DimChannelID,
+    ChannelCategoryID,
+	ChannelName,
+	ChannelCategory
+)
+VALUES
+( 
+     -1
+    , -1
+    , 'Unknown'
+    , 'Unknown'
+);
+
+Insert Into DIM_Channel
+(
+    ChannelCategoryID,
+	ChannelName,
+	ChannelCategory  
+)
+  SELECT 
+      C.ChannelCategoryID as ChannelCategoryID,
+      C.Channel as ChannelName,
+      CC.ChannelCategory
+
+  FROM STAGE_CHANNEL as C
+  JOIN STAGE_CHANNELCATEGORY as CC on CC.ChannelCategoryID = C.ChannelCategoryID
+
+select * from DIM_Channel;
+
+--===================================================
+-------------DIM_Customer
+--===================================================
+
+Create or Replace table DIM_Customer(
+	DimCustomerID INT IDENTITY(1,1) CONSTRAINT PK_DimCustomerID PRIMARY KEY NOT NULL,
+    DimLocationID INTEGER CONSTRAINT FK_DimLocationIDReseller FOREIGN KEY REFERENCES Dim_Location (DimLocationID),  
+	CustomerID      VARCHAR(255) NOT NULL,
+	CustomerFullName    VARCHAR(255) NOT NULL,
+	CustomerFirstName   VARCHAR(255) NOT NULL,
+	CustomerLastName    VARCHAR(255) NOT NULL,
+    CustomerGender      VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Customer
+(
+    DimCustomerID,
+    DimLocationID,
+	CustomerID,
+	CustomerFullName,
+	CustomerFirstName,
+	CustomerLastName,
+    CustomerGender
+)
+VALUES
+( 
+     -1
+    , -1
+    , -1
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+);
+
+-- insert data
+Insert Into DIM_Customer
+(
+	DIMLocationID,
+    CustomerID,
+	CustomerFullName,
+	CustomerFirstName,
+	CustomerLastName,
+    CustomerGender
+)    
+    Select 
+        DimLocationID,
+        CAST(SC.CustomerID AS VARCHAR(255)) as CustomerID,
+        CONCAT(FirstName, ' ', LastName) as CustomerFullName,
+        FirstName as CustomerFirstName,
+        LastName as CustomerLastName,
+        Gender as CustomerGender
+        
+    From Stage_Customer SC
+    INNER JOIN DIM_Location DL on DL.DimSourceLocationID = SC.CustomerID;
+    
+select * from DIM_Customer;
+select * from DIM_Location;
+
+--===================================================
+-------------DIM_Reseller
+--===================================================
+
+Create or Replace table DIM_Reseller(
+	DimResellerID INT IDENTITY(1,1) CONSTRAINT PK_DimResellerID PRIMARY KEY NOT NULL,
+    DimLocationID INTEGER CONSTRAINT FK_DimLocationIDReseller FOREIGN KEY REFERENCES Dim_Location (DimLocationID),   
+	ResellerID      VARCHAR(255) NOT NULL,
+	ResellerName    VARCHAR(255) NOT NULL,
+	ContactName     VARCHAR(255) NOT NULL,
+	PhoneNumber     VARCHAR(255) NOT NULL,
+    Email           VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Reseller
+(
+    DimResellerID,
+    DimLocationID,
+	ResellerID,
+	ResellerName,
+	ContactName,
+	PhoneNumber,
+    Email
+)
+VALUES
+( 
+     -1
+    , -1
+    , -1
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+    , 'Unknown'
+);
+
+-- insert data
+INSERT INTO DIM_Reseller
+(
+	DIMLocationID,	
+    ResellerID,
+	ResellerName,
+	ContactName,
+	PhoneNumber,
+    Email
+)
+SELECT
+    DL.DIMLocationID,
+    SR.ResellerID,
+	SR.ResellerName,
+	SR.Contact,
+	SR.PhoneNumber,
+    SR.EmailAddress
+From Stage_Reseller SR
+INNER JOIN DIM_Location DL on DL.DimSourceLocationID = SR.ResellerID;
+
+select * from DIM_Reseller;
+
+
+--===================================================
+-------------DIM_Store
+--===================================================
+
+Create or Replace table DIM_Store(
+	DimStoreID INT IDENTITY(1,1) CONSTRAINT PK_DimStoreID PRIMARY KEY NOT NULL,
+    DimLocationID INTEGER CONSTRAINT FK_DimLocationIDStore FOREIGN KEY REFERENCES Dim_Location (DimLocationID), 
+	SourceStoreID   INTEGER NOT NULL,
+	StoreName       VARCHAR(255) NOT NULL,
+	StoreNumber     INTEGER NOT NULL,
+	StoreManager    VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Store
+(
+    DimStoreID,
+    DimLocationID,
+	SourceStoreID,
+	StoreName,
+	StoreNumber,
+	StoreManager 
+)
+
+VALUES
+( 
+     -1
+    , -1
+    , -1
+    ,'Unknown'
+    ,-1
+    ,'Unknown'
+);
+
+-- insert data
+INSERT INTO DIM_Store
+(
+	SourceStoreID,
+    DimLocationID,
+	StoreName,
+	StoreNumber,
+	StoreManager 
+)
+  Select 
+      SS.StoreID,
+      DL.DimLocationID,
+      SS.StoreNumber,
+      SS.StoreNumber,
+      SS.StoreManager
+  From Stage_Store SS
+  INNER JOIN DIM_Location DL on DL.DimSourceLocationID = SS.StoreID;
+
+select * from DIM_Store;
+select * from Dim_Location;
+select * from STAGE_Store;
+
+--===================================================
+-------------DIM_Location
+--===================================================
+
+Create or Replace table DIM_Location (
+	DimLocationID INT IDENTITY(1,1) CONSTRAINT PK_DimLocationID PRIMARY KEY NOT NULL,
+    DimSourceLocationID VARCHAR(255) NOT NULL,	
+  	PostalCode INT NOT NULL,  
+    ADDRESS	VARCHAR(255) NOT NULL,
+	CITY VARCHAR(255) NOT NULL,
+	State_Province VARCHAR(255) NOT NULL,
+	Country VARCHAR(255) NOT NULL
+);
+
+-- insert unknowns
+INSERT INTO DIM_Location
+(
+     DimLocationID
+    , DimSourceLocationID
+	, PostalCode
+    , ADDRESS
+    , CITY
+    , State_Province
+    , Country
+)
+
+VALUES
+( 
+     -1
+    , -1
+    , -1
+    ,'Unknown'
+    ,'Unknown'
+    ,'Unknown'
+    ,'Unknown'
+);
+
+INSERT INTO DIM_Location
+(
+      DimSourceLocationID
+	, PostalCode
+    , ADDRESS
+    , CITY
+    , State_Province
+    , Country
+)
+-- insert data
+   SELECT DISTINCT
+          CAST(Stage_Customer.CustomerID AS VARCHAR(255)) as CustomerID
+        , CAST(Stage_Customer.PostalCode AS INTEGER) as PostalCode
+        , ADDRESS
+        , CITY
+        , StateProvince as State_Province
+        , Country
+
+    FROM STAGE_Customer 
+    UNION
+     SELECT DISTINCT
+            CAST(Stage_Store.StoreID AS VARCHAR(255)) as SourceStoreID
+          , CAST(Stage_Store.PostalCode AS INTEGER) as PostalCode
+          , ADDRESS
+          , CITY
+          , StateProvince as State_Province
+          , Country
+
+      FROM STAGE_Store
+    UNION
+       SELECT DISTINCT
+          CAST(Stage_Reseller.ResellerID AS VARCHAR(255)) as ResellerID
+        , CAST(Stage_Reseller.PostalCode AS INTEGER) as PostalCode
+        , ADDRESS
+        , CITY
+        , StateProvince as State_Province
+        , Country
+
+        FROM STAGE_Reseller
+    
+select * from DIM_Location;
