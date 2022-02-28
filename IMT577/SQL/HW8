@@ -1,0 +1,163 @@
+/*****************************************
+Nebiat Abraha
+Course: IMT 577
+Instructor: Sean Pettersen
+Notes: Creating simple and aggregate views
+*****************************************/
+
+SELECT DISTINCT  
+   Dim_Planets.DimPlanetID
+  ,Dim_Characters.DimCharacterID
+          ,Dim_Species.DimSpeciesID
+  ,Stage_StarwarsPlanets.RotationPeriod
+          ,Stage_StarwarsPlanets.OrbitalPeriod
+          ,Stage_StarwarsPlanets.Diameter
+          ,Stage_StarwarsPlanets.SurfaceWaterPct
+          ,Stage_StarwarsPlanets.Population
+FROM Stage_StarwarsPlanets
+INNER JOIN Dim_Planets ON
+Dim_Planets.PlanetID = Stage_StarwarsPlanets.PlanetID
+INNER JOIN Dim_Characters ON
+Dim_Characters.Homeworld = Stage_StarwarsPlanets.PlanetName 
+    LEFT OUTER JOIN Dim_Species ON
+Dim_Species.Homeworld = Stage_StarwarsPlanets.PlanetName 
+    --ORDER BY Dim_Characters.DimCharacterID
+
+
+
+-- Product sales by day of week
+-- connect sales table, product table, dim_date table
+
+Create View ProductSalesbyDay
+as
+select
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------
+--------------------------------------------
+Create View Channel
+as 
+Select
+    DimChannelID,
+    ChannelCategoryID,
+    ChannelName,
+    ChannelCategory
+From
+    Dim_Channel;
+    
+Create View Customer
+as
+Select
+    DimCustomerID,
+    DimLocationID,
+    CustomerID,
+    CustomerFULLNAME,
+    CustomerFIRSTNAME,
+    CustomerLASTNAME,
+    CustomerGender
+From
+    Dim_Customer;
+
+Create View Location
+as
+Select
+    DimLocationID,
+    DimSourceLocationID,
+    PostalCode,
+    Address,
+    City,
+    State_Province,
+    Country
+From
+    Dim_Location;
+    
+Create View Product
+as
+Select
+      DimProductID
+    , ProductID
+    , ProductCategoryID
+    , ProductName
+    , ProductType
+    , ProductCategory
+    , ProductRetailPrice
+    , ProductWholesalePrice
+    , ProductCost
+    , ProductRetailProfit
+    , ProductWholesaleUnitProfit
+    , ProdcutProfitMarginUnitPercent
+From
+    Dim_Product;
+    
+Create View Reseller
+as
+Select
+    DimResellerID,
+    DimLocationID,
+	ResellerID,
+	ResellerName,
+	ContactName,
+	PhoneNumber,
+    Email
+From
+    Dim_Reseller;
+    
+select * from Dim_Store
+
+Create View Store
+as
+Select
+    DimStoreID,
+    DimLocationID,
+	SourceStoreID,
+	StoreName,
+	StoreNumber,
+	StoreManager
+From 
+    Dim_Store;
+    
+Create View FactSalesActual
+as
+Select
+    DimProductID 
+    , DimStoreID
+    , DimResellerID 
+    , DimCustomerID 
+    , DimChannelID
+    , DimSalesDateID
+    , DimLocationID
+    , SALESHEADERID
+    , SALESDETAILID
+    , SALEAMOUNT
+    , SaleQuantity
+    , SaleUnitPrice
+    , SaleExtendedCost
+    , SaleTotalProfit
+from Fact_SalesActual;
+
+Create View FactSRCSalesTarget
+as
+Select
+      DimStoreID
+    , DimResellerID
+    , DimChannelID
+    , TargetDateID
+    , SalesTargetAmount
+from Fact_SRCSALESTARGET
+
+
+Create View FactProductSalesTarget
+as
+Select
+      DimProductID
+    , DimTargetDateID
+    , ProductTargetSalesQuantity
+From Fact_PRODUCTSALESTARGET
